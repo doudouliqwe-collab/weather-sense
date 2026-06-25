@@ -4,7 +4,8 @@ os.environ['TZ'] = 'Asia/Shanghai'
 from flask import Flask, request, jsonify
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone
+import pytz
 import time
 
 app = Flask(__name__)
@@ -46,7 +47,6 @@ def upload():
         weather_desc = current['weatherDesc'][0]['value']
         
         # 翻译体感（更生动的版本）
-        # 天气描述翻译
         weather_cn = {
             "Sunny": "晴天",
             "Partly cloudy": "多云转晴",
@@ -93,12 +93,15 @@ def upload():
             except:
                 feel += f"，手机电量{battery}%"
         
+        # 强制使用北京时间
+        beijing_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M:%S")
+        
         # 保存到内存
         latest_env = {
             "feel": feel,
             "temp": temp,
             "weather": weather_desc,
-            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_at": beijing_time,
             "battery": str(battery) if battery else "--"
         }
         
